@@ -543,7 +543,7 @@ static void registerNoWin32Hooks()
     {
         if (i == 0x4d7130 || i == 0x4d7134 || i == 0x4d7138 || i == 0x4d713c) {
            // don't hookdump heap functions
-           continue
+           continue;
         }
         hookDump(i, (void*)&fn_dump);
     }
