@@ -6,7 +6,6 @@
 #include <sys/mman.h>
 #include <unistd.h>
 #endif
-#include <windows.h>
 #include "../Audio/Audio.h"
 #include "../Console.h"
 #include "../Core/FileSystem.hpp"
@@ -468,7 +467,7 @@ static uint32_t STDCALL lib_SetFileAttributesA(char* lpFileName, uint32_t dwFile
 }
 
 FORCE_ALIGN_ARG_POINTER
-static long STDCALL lib_UnhandledExceptionFilter(struct _EXCEPTION_POINTERS* exceptionInfo)
+static long STDCALL lib_UnhandledExceptionFilter(/*_EXCEPTION_POINTERS* */ uintptr_t exceptionInfo)
 {
     Console::log("UnhandledExceptionFilter(0x%lx)", exceptionInfo);
     //Console::log("ExceptionCode %d (is %d?)", exceptionInfo->ExceptionRecord->ExceptionCode);
