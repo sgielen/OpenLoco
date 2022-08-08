@@ -3,6 +3,8 @@
 #include <cstring>
 #include <stdexcept>
 
+#define _LOG_INTEROP_CALLS_ 1
+
 #ifdef _WIN32
 #ifndef NOMINMAX
 #define NOMINMAX
