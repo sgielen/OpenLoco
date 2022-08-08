@@ -206,32 +206,42 @@ namespace OpenLoco::ObjectManager
     // Adds a new object to the index by: 1. creating a partial index, 2. validating, 3. creating a full index entry
     static void addObjectToIndex(const fs::path filepath, size_t& usedBufferSize)
     {
+        std::cout << "addObjectToIndex a" << std::endl;
         ObjectHeader objHeader{};
         {
+            std::cout << "addObjectToIndex b" << std::endl;
             std::ifstream stream;
             stream.open(filepath, std::ios::in | std::ios::binary);
+            std::cout << "addObjectToIndex c" << std::endl;
             Utility::readData(stream, objHeader);
+            std::cout << "addObjectToIndex d" << std::endl;
             if (stream.gcount() != sizeof(objHeader))
             {
                 return;
             }
+            std::cout << "addObjectToIndex e" << std::endl;
         }
 
+        std::cout << "addObjectToIndex f" << std::endl;
         const auto curObjPos = usedBufferSize;
         const auto partialNewEntry = createPartialNewEntry(&_installedObjectList[usedBufferSize], objHeader, filepath.filename());
         usedBufferSize += partialNewEntry.second;
         _installedObjectCount++;
+        std::cout << "addObjectToIndex g" << std::endl;
 
         _isPartialLoaded = true;
         _50D158 = _112A17F;
+        std::cout << "addObjectToIndex h" << std::endl;
         getScenarioText(objHeader);
         _50D158 = reinterpret_cast<std::byte*>(-1);
         _isPartialLoaded = false;
+        std::cout << "addObjectToIndex i" << std::endl;
         if (_installedObjectCount == 0)
         {
             return;
         }
         _installedObjectCount--;
+        std::cout << "addObjectToIndex j" << std::endl;
 
         // Rewind as it is only a partial object loaded
         usedBufferSize = curObjPos;
@@ -239,15 +249,19 @@ namespace OpenLoco::ObjectManager
         // Load full entry into temp buffer.
         // 0x009D1CC8
         std::byte newEntryBuffer[0x2000] = {};
+        std::cout << "addObjectToIndex k" << std::endl;
         const auto [newEntry, newEntrySize] = createNewEntry(newEntryBuffer, objHeader, filepath.filename());
 
+        std::cout << "addObjectToIndex l" << std::endl;
         freeScenarioText();
 
         auto* indexPtr = *_installedObjectList;
         // This ptr will be pointing at where in the object list to install the new entry
         auto* installPtr = indexPtr;
+        std::cout << "addObjectToIndex m" << std::endl;
         for (uint32_t i = 0; i < _installedObjectCount; i++)
         {
+            std::cout << "addObjectToIndex n" << std::endl;
             auto entry = ObjectIndexEntry::read(&indexPtr);
             if (strcmp(newEntry._name, entry._name) < 0)
             {
@@ -257,12 +271,16 @@ namespace OpenLoco::ObjectManager
             installPtr = indexPtr;
         }
 
+        std::cout << "addObjectToIndex o" << std::endl;
         auto moveSize = usedBufferSize - (installPtr - *_installedObjectList);
         std::memmove(installPtr + newEntrySize, installPtr, moveSize);
+        std::cout << "addObjectToIndex p" << std::endl;
         std::memcpy(installPtr, newEntryBuffer, newEntrySize);
         usedBufferSize += newEntrySize;
 
+        std::cout << "addObjectToIndex q" << std::endl;
         _installedObjectCount++;
+        std::cout << "addObjectToIndex r" << std::endl;
     }
 
     // 0x0047118B
@@ -310,11 +328,14 @@ namespace OpenLoco::ObjectManager
             std::cout << "J " << file.path() << std::endl;
             if (!file.is_regular_file())
             {
+                std::cout << "not a regular file" << std::endl;
                 continue;
             }
             const auto extension = file.path().extension().u8string();
+            std::cout << "extension: " << extension << std::endl;
             if (!Utility::iequals(extension, ".DAT"))
             {
+                std::cout << "not extension DAT, ignoring" << std::endl;
                 continue;
             }
             Ui::processMessagesMini();
@@ -322,6 +343,7 @@ namespace OpenLoco::ObjectManager
 
             // Cheap calculation of (curObjectCount / totalObjectCount) * 256
             const auto newProgress = (header.state.numObjects << 8) / ((currentState.numObjects & 0xFFFFFF) + 1);
+            std::cout << "newProgress " << newProgress << std::endl;
             if (progress != newProgress)
             {
                 progress = newProgress;
@@ -330,18 +352,23 @@ namespace OpenLoco::ObjectManager
 
             // Grow object list buffer if near limit
             const auto remainingBuffer = bufferSize - usedBufferSize;
+            std::cout << "buffer calc: " << bufferSize << " - " << usedBufferSize << " = " << remainingBuffer << std::endl;
             if (remainingBuffer < 0x231E)
             {
                 // Original grew buffer at slower rate. Memory is cheap though
                 bufferSize *= 2;
+                std::cout << "reallocating " << bufferSize << " bytes from " << (void*)*_installedObjectList << std::endl;
                 _installedObjectList = static_cast<std::byte*>(realloc(*_installedObjectList, bufferSize));
+                std::cout << "got: " << (void*)*_installedObjectList << std::endl;
                 if (_installedObjectList == nullptr)
                 {
+                    std::cout << "unable to allocate enough memory" << std::endl;
                     exitWithError(StringIds::unable_to_allocate_enough_memory, StringIds::game_init_failure);
                     return;
                 }
             }
 
+            std::cout << "addObjectToIndex" << std::endl;
             addObjectToIndex(file.path(), usedBufferSize);
             std::cout << "K" << std::endl;
         }
