@@ -5,7 +5,7 @@
 #ifndef _WIN32
 #include <sys/mman.h>
 #include <unistd.h>
-#include <errhandlingapi.h>
+#include <winnt.h>
 #endif
 #include "../Audio/Audio.h"
 #include "../Console.h"
