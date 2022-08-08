@@ -11,6 +11,7 @@
 #include "ObjectManager.h"
 #include <cstdint>
 #include <fstream>
+#include <iostream>
 
 using namespace OpenLoco::Interop;
 
