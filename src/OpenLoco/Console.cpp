@@ -2,6 +2,8 @@
 #include "Utility/String.hpp"
 #include <stdarg.h>
 
+#define VERBOSE 1
+
 namespace OpenLoco::Console
 {
     static int _group = 0;
