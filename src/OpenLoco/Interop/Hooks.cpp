@@ -467,6 +467,14 @@ static uint32_t STDCALL lib_SetFileAttributesA(char* lpFileName, uint32_t dwFile
 }
 
 FORCE_ALIGN_ARG_POINTER
+static void* STDCALL lib_UnhandledExceptionFilter(uintptr_t exceptionInfo)
+{
+    Console::log("UnhandledExceptionFilter(0x%lx, %d, %s)", exceptionInfo);
+
+    return nullptr;
+}
+
+FORCE_ALIGN_ARG_POINTER
 static void* STDCALL lib_CreateMutexA(uintptr_t lmMutexAttributes, bool bInitialOwner, char* lpName)
 {
     Console::log("CreateMutexA(0x%lx, %d, %s)", lmMutexAttributes, bInitialOwner, lpName);
@@ -532,6 +540,7 @@ static void registerNoWin32Hooks()
     // fill DLL hooks for ease of debugging
     for (int i = 0x4d7000; i <= 0x4d72d8; i += 4)
     {
+        //if (i != 0x4d70bc)
         hookDump(i, (void*)&fn_dump);
     }
 
@@ -542,6 +551,7 @@ static void registerNoWin32Hooks()
     hookLib(0x4d7078, (void*)&lib_CreateRectRgn);
 
     // kernel32.dll
+    hookLib(0x4d70bc, (void*)&lib_UnhandledExceptionFilter);
     hookLib(0x4d70e0, (void*)&lib_CreateMutexA);
     hookLib(0x4d70e4, (void*)&lib_OpenMutexA);
     hookLib(0x4d70f0, (void*)&lib_WriteFile);
