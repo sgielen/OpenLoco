@@ -5,6 +5,7 @@
 #ifndef _WIN32
 #include <sys/mman.h>
 #include <unistd.h>
+#include <errhandlingapi.h>
 #endif
 #include "../Audio/Audio.h"
 #include "../Console.h"
@@ -467,11 +468,12 @@ static uint32_t STDCALL lib_SetFileAttributesA(char* lpFileName, uint32_t dwFile
 }
 
 FORCE_ALIGN_ARG_POINTER
-static void* STDCALL lib_UnhandledExceptionFilter(uintptr_t exceptionInfo)
+static long STDCALL lib_UnhandledExceptionFilter(_EXCEPTION_POINTERS *exceptionInfo)
 {
-    Console::log("UnhandledExceptionFilter(0x%lx, %d, %s)", exceptionInfo);
+    Console::log("UnhandledExceptionFilter(0x%lx)", exceptionInfo);
+    Console::log("ExceptionCode %d (is %d?)", exceptionInfo->ExceptionRecord->ExceptionCode);
 
-    return nullptr;
+    return 0;
 }
 
 FORCE_ALIGN_ARG_POINTER
@@ -540,7 +542,9 @@ static void registerNoWin32Hooks()
     // fill DLL hooks for ease of debugging
     for (int i = 0x4d7000; i <= 0x4d72d8; i += 4)
     {
-        //if (i != 0x4d70bc)
+        if (i == 0x4d7130 || i == 0x4d7134 || i == 0x4d7138 || i == 0x4d713c) {
+           // don't hookdump heap functions
+        }
         hookDump(i, (void*)&fn_dump);
     }
 
